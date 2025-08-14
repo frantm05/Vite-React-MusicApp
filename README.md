@@ -35,7 +35,3 @@ A minimalist and fully functional music player application built using **React**
     ```
 
 The application should now be running on `http://localhost:5173`.
-
-### License 📄
-
-This project is licensed under the MIT License.
