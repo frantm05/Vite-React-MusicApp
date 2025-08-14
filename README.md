@@ -22,7 +22,7 @@ A minimalist and fully functional music player application built using **React**
     ```
 2.  Navigate to the project directory:
     ```bash
-    cd Music-App
+    cd MusicApp
     cd my-music-player
     ```
 3.  Install dependencies:
