@@ -18,7 +18,7 @@ A minimalist and fully functional music player application built using **React**
 
 1.  Clone the repository:
     ```bash
-    git clone frantm05/Vite-React-MusicApp
+    git clone https://github.com/frantm05/Vite-React-MusicApp.git
     ```
 2.  Navigate to the project directory:
     ```bash
