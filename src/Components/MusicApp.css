@@ -21,6 +21,7 @@
   flex-direction: column;
   padding: 3rem;
   overflow: hidden;
+  position: relative;
 }
 
 .player-top {
@@ -35,7 +36,7 @@
 
 .player-top-title {
   font-size: 1.8rem;
-  font-weight: normal;
+  font-weight: 800;
   color: #a8a9ab;
   white-space: nowrap;
   overflow: hidden;
@@ -284,6 +285,7 @@
 
 .song-list-name span {
   color: #fff;
+  font-weight: 700;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -317,14 +319,29 @@
   cursor: default;
 }
 
-.delete-track-btn {
+.song-list-details .favorite-btn {
+  font-size: 1.5rem;
+  padding: 0.6rem;
+}
+
+.row-action-btn {
   background: none;
   border: none;
   color: #7a7b7d;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   cursor: pointer;
-  padding: 0.8rem 0.8rem 0.8rem 0;
+  padding: 0.6rem;
   flex-shrink: 0;
+}
+
+.row-action-btn:hover,
+.row-action-btn:focus-visible {
+  color: #c86bff;
+}
+
+.row-action-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .delete-track-btn:hover,
@@ -474,6 +491,186 @@
   border: none;
 }
 
+.search-source-toggle {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+  flex-shrink: 0;
+}
+
+.search-source-toggle button {
+  flex: 1;
+  background: #26272a;
+  border: 0.15rem solid transparent;
+  border-radius: 1.2rem;
+  color: #a8a9ab;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 0.8rem;
+  cursor: pointer;
+}
+
+.search-source-toggle button small {
+  display: block;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #7a7b7d;
+}
+
+.search-source-toggle button.active {
+  border-color: #6c009e;
+  color: #c86bff;
+}
+
+.playlists-view {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  color: #a8a9ab;
+}
+
+.playlists-view .songs-list {
+  margin-top: 1.5rem;
+}
+
+.playlist-create {
+  display: flex;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+
+.playlist-create input {
+  flex: 1;
+  min-width: 0;
+  background: #26272a;
+  border: none;
+  border-radius: 1.2rem;
+  padding: 1rem 1.4rem;
+  color: #fff;
+  font-size: 1.4rem;
+  font-family: inherit;
+}
+
+.playlist-create input::placeholder {
+  color: #6b6c6f;
+}
+
+.playlist-create button {
+  background: linear-gradient(to right, #460066, #6c009e);
+  border: none;
+  border-radius: 1.2rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 0 1.6rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.playlist-create button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.playlist-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.playlist-detail-name {
+  flex: 1;
+  min-width: 0;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlist-picker {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.playlist-picker-panel {
+  width: 100%;
+  max-width: 40rem;
+  max-height: 70%;
+  overflow: auto;
+  background: #26272a;
+  border-radius: 2rem 2rem 0 0;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  color: #a8a9ab;
+}
+
+.playlist-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 1.4rem;
+}
+
+.playlist-picker-header strong {
+  color: #fff;
+}
+
+.playlist-picker-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.playlist-picker-list button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #313234;
+  border: none;
+  border-radius: 1.2rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.4rem;
+  padding: 1.1rem 1.4rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.playlist-picker-list button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.playlist-picker-list button small {
+  margin-left: auto;
+  color: #7a7b7d;
+  font-size: 1.1rem;
+}
+
+.player-notice {
+  color: #9be29b;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
 .song-info {
   width: 100%;
   display: flex;
@@ -493,6 +690,7 @@
 
 .song-name {
   font-size: 2rem;
+  font-weight: 800;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
@@ -709,6 +907,7 @@
 
 .footer-nav-btn span {
   font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .footer-nav-btn.active {

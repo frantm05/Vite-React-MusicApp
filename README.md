@@ -6,12 +6,16 @@ A fully functional music player built with **React**, **TypeScript** and **Vite*
 
 - **Local library**: play the bundled tracks with full playback control.
 - **Your own music**: upload audio files (with optional cover art) straight in the browser - they're stored in IndexedDB and survive reloads.
-- **Online search**: search any song or artist via the iTunes Search API (no API key required). Results play a ~30s preview clip, since no free API offers full-length legal streaming.
-- **Favorites**: like any track (local, uploaded, or from search), persisted in `localStorage`.
+- **Online search from two sources**:
+  - **iTunes Search API** - huge catalog, ~30s preview clips (no free API offers full-length streaming of mainstream catalog).
+  - **Audius** - openly licensed / artist-uploaded music with **full-length streaming**, and tracks whose artist allows it can be **saved into your library** for keeps.
+- **Playlists**: create your own playlists and add tracks from any list via the "+" button.
+- **Favorites**: like any track, persisted in `localStorage`.
 - **Playback controls**: play/pause, next/previous, drag-to-seek progress bar, volume flyout with mute, shuffle, and three repeat modes.
+- **Swipe navigation**: switch tabs by swiping left/right on touch screens, or use the bottom tab bar.
 - **Responsive**: single-column player on mobile, two-pane layout (player + list) on desktop.
 - **PWA-ready**: web app manifest and icons - add it to your phone's home screen and it opens like a native app.
-- **Accessible**: labelled controls, keyboard seeking, visible focus states, screen-reader announcements on tab switch.
+- **Accessible**: labelled controls, keyboard seeking, visible focus states, screen-reader announcements on tab switch. Self-hosted Nunito font with full Czech diacritics support.
 
 ### Tech stack 🛠️
 

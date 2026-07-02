@@ -1,13 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Delicious+Handrawn&family=Lilita+One&display=swap');
+/* Nunito Variable is self-hosted via @fontsource-variable/nunito (imported in
+   main.tsx) - full latin-ext coverage, so Czech diacritics (ř, ě, ů...) render
+   in the same face instead of falling back mid-word. */
 
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Lilita One', sans-serif;
+    font-family: 'Nunito Variable', system-ui, sans-serif;
 }
 
-html{
+html {
     font-size: 62.5%;
 }
 

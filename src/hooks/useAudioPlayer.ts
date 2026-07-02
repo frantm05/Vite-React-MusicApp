@@ -29,7 +29,15 @@ export function useAudioPlayer({
   initialVolume = 1,
 }: UseAudioPlayerParams) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const isPlayingRef = useRef(false);
+  /**
+   * Whether playback SHOULD continue - the user's intent, not the element's
+   * state. Deliberately separate from isPlaying: when a track finishes, the
+   * browser fires 'pause' (flipping isPlaying to false) right before
+   * 'ended', so keying the load effect's autoplay off isPlaying would stop
+   * playback after every auto-advanced track. Only explicit actions
+   * (play/pause/selectTrack/auto-advance) may write this ref.
+   */
+  const playIntentRef = useRef(false);
   const repeatModeRef = useRef(repeatMode);
   const shuffleHistoryRef = useRef<number[]>([]);
 
@@ -42,10 +50,6 @@ export function useAudioPlayer({
 
   const currentTrack: Track | null = queue[index] ?? null;
   const trackKey = currentTrack?.id ?? null;
-
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
 
   useEffect(() => {
     repeatModeRef.current = repeatMode;
@@ -70,6 +74,7 @@ export function useAudioPlayer({
   const restartCurrentTrack = () => {
     const audio = audioRef.current;
     if (!audio) return;
+    playIntentRef.current = true;
     audio.currentTime = 0;
     playSafely(audio);
   };
@@ -125,6 +130,10 @@ export function useAudioPlayer({
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => {
+      // A finished track means playback should continue on the next one.
+      // (The element fired 'pause' just before 'ended', so isPlaying-derived
+      // state can't be trusted here.)
+      playIntentRef.current = true;
       if (repeatModeRef.current === "one") {
         audio.currentTime = 0;
         audio.play().catch(() => {});
@@ -166,6 +175,7 @@ export function useAudioPlayer({
 
     if (!currentTrack) {
       // Queue emptied (e.g. the playing custom track was deleted) - unload.
+      playIntentRef.current = false;
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
@@ -176,7 +186,7 @@ export function useAudioPlayer({
     audio.src = currentTrack.src;
     audio.load();
 
-    if (isPlayingRef.current) {
+    if (playIntentRef.current) {
       playSafely(audio);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -190,10 +200,12 @@ export function useAudioPlayer({
   }, [volume, muted]);
 
   const play = () => {
+    playIntentRef.current = true;
     if (audioRef.current) playSafely(audioRef.current);
   };
 
   const pause = () => {
+    playIntentRef.current = false;
     audioRef.current?.pause();
   };
 
@@ -230,7 +242,7 @@ export function useAudioPlayer({
 
   /** Explicitly chosen from a list - always starts playback, unlike next/prev. */
   const selectTrack = (newIndex: number) => {
-    isPlayingRef.current = true;
+    playIntentRef.current = true;
     onIndexChange(newIndex);
   };
 
