@@ -1,35 +1,33 @@
-import propTypes from 'prop-types';
-import { useEffect } from 'react';
+import PropTypes from "prop-types";
 
-const PlayerBody = (props) => {
-
-    useEffect(() => {
-        const coverElement = document.querySelector(".cover");
-    
-        if (props.isPlaying && coverElement) {
-          coverElement.classList.add("rotate");
-        } else if (!props.isPlaying && coverElement) {
-          coverElement.classList.remove("rotate");
-        }
-      });
-
-    return(
-        <div className="player-body">
-            <div className="current-song">
-              <img
-                src={"./src/assets/" + props.songData[props.songIndex].img}
-                alt="cover"
-                className="cover"
-              />
-            </div>
+const PlayerBody = ({ track, isPlaying }) => {
+  return (
+    <div className="player-body">
+      <div className="current-song">
+        {track ? (
+          <img
+            src={track.img}
+            alt={`${track.name} cover`}
+            className={`cover ${isPlaying ? "rotate" : ""}`}
+          />
+        ) : (
+          <div className="cover cover-empty">
+            <i className="fa-solid fa-music"></i>
           </div>
-    )
-}
+        )}
+        {track?.isPreview && <span className="preview-badge">30s ukázka</span>}
+      </div>
+    </div>
+  );
+};
 
 PlayerBody.propTypes = {
-    songData: propTypes.array,
-    songIndex: propTypes.number,
-    isPlaying: propTypes.bool
-}
+  track: PropTypes.shape({
+    name: PropTypes.string,
+    img: PropTypes.string,
+    isPreview: PropTypes.bool,
+  }),
+  isPlaying: PropTypes.bool,
+};
 
 export default PlayerBody;
