@@ -1,40 +1,57 @@
 # Music App 🎶
 
-A fully functional music player built with **React** and **Vite**. It combines a bundled local music library with online search powered by the free **iTunes Search API**.
+A fully functional music player built with **React**, **TypeScript** and **Vite**. It combines a bundled local music library, your own uploaded tracks, and online search powered by the free **iTunes Search API**.
 
 ### Features ✨
 
 - **Local library**: play the bundled tracks with full playback control.
+- **Your own music**: upload audio files (with optional cover art) straight in the browser - they're stored in IndexedDB and survive reloads.
 - **Online search**: search any song or artist via the iTunes Search API (no API key required). Results play a ~30s preview clip, since no free API offers full-length legal streaming.
-- **Favorites**: like any track (local or from search) and find it later, persisted in `localStorage`.
-- **Playback controls**: play/pause, next/previous, click-to-seek progress bar, volume slider with mute, shuffle, and three repeat modes.
-- **Responsive, accessible UI**: works on mobile and desktop, with `aria-label`s and visible keyboard focus states.
+- **Favorites**: like any track (local, uploaded, or from search), persisted in `localStorage`.
+- **Playback controls**: play/pause, next/previous, drag-to-seek progress bar, volume flyout with mute, shuffle, and three repeat modes.
+- **Responsive**: single-column player on mobile, two-pane layout (player + list) on desktop.
+- **PWA-ready**: web app manifest and icons - add it to your phone's home screen and it opens like a native app.
+- **Accessible**: labelled controls, keyboard seeking, visible focus states, screen-reader announcements on tab switch.
 
-### Technologies Used 🛠️
+### Tech stack 🛠️
 
-- **React 18** + **Vite 5**
+- **React 18** + **TypeScript** + **Vite 5**
+- **Vitest** unit tests and a **GitHub Actions** CI pipeline (lint, typecheck, test, build)
 - **iTunes Search API** for song search and preview playback
-- **Font Awesome** icons (self-hosted via npm)
+- **IndexedDB** for user-uploaded tracks, **Font Awesome** icons (self-hosted via npm)
 
-### Installation and Usage 🚀
+### Getting started 🚀
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/frantm05/Vite-React-MusicApp.git
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd MusicApp/my-music-player
-    ```
-3.  Install dependencies:
-    ```bash
-    npm install
-    ```
-4.  Run the development server:
-    ```bash
-    npm run dev
-    ```
+```bash
+git clone https://github.com/frantm05/Vite-React-MusicApp.git
+cd Vite-React-MusicApp
+npm install
+npm run dev
+```
 
-The application should now be running on `http://localhost:5173`.
+The app runs at `http://localhost:5173`.
 
-See [`MusicApp/my-music-player/README.md`](MusicApp/my-music-player/README.md) for more detail.
+Other scripts:
+
+```bash
+npm run build      # typecheck + production build (dist/)
+npm test           # unit tests (vitest)
+npm run lint       # eslint
+npm run typecheck  # tsc --noEmit
+```
+
+### Project structure
+
+```
+src/
+├── Components/   # presentational React components
+├── hooks/        # useAudioPlayer, useCustomLibrary, useItunesSearch, ...
+├── services/     # iTunes API client, IndexedDB access
+├── utils/        # pure helpers (queue navigation, time formatting) + tests
+├── data/         # bundled local library
+└── types.ts      # Track union type & shared types
+```
+
+### API note
+
+Search uses the public `https://itunes.apple.com/search` endpoint. It needs no API key or configuration, but returns only ~30-second preview clips (`previewUrl`) - the same licensing limitation Spotify or Deezer have without a paid streaming license.
