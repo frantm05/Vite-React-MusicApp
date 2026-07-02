@@ -1,173 +1,164 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import PlayerTop from "./PlayerTop";
 import PlayerBody from "./PlayerBody";
-import SongList from "./SongList";
+import TrackList from "./TrackList";
+import SearchView from "./SearchView";
 import SongInfo from "./SongInfo";
 import SongDuration from "./SongDuration";
 import Time from "./Time";
+import VolumeControl from "./VolumeControl";
 import PlayerFooter from "./PlayerFooter";
 import Controls from "./Controls";
+import { localLibrary } from "../data/localLibrary";
+import { useAudioPlayer } from "../hooks/useAudioPlayer";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+
+const VIEW_TITLES = {
+  player: "Now Playing...",
+  library: "Knihovna",
+  search: "Hledat",
+  favorites: "Oblíbené",
+};
 
 /**
- * The main component for the music player application.
- * It manages the state and behavior of the music player.
+ * Top-level orchestrator: owns which list is currently playable (the
+ * "queue"), the active view, favorites and playback settings. Actual
+ * audio mechanics live in useAudioPlayer.
  */
 const MusicApp = () => {
-  const songRefs = useRef([]);
-  const [songData, setSongData] = useState([
-    {
-      name: "City Of Stars",
-      artist: "Ryan Gosling & Emma Stone",
-      src: "City Of Stars.mp3",
-      img: "lalaland.jpg",
-    },
-    {
-      name: "Nightcall",
-      artist: "Kavinsky",
-      src: "Nightcall.mp3",
-      img: "drive.jpg",
-    },
-    {
-      name: "Pedro",
-      artist: "Raffaella Carrà",
-      src: "Pedro.mp3",
-      img: "pedro.jpg",
-    },
-    {
-      name: "Good Feeling",
-      artist: "Violet",
-      src: "goodFeeling.mp3",
-      img: "goodFeeling.jpg",
-    },
-    {
-      name: "Duel of the Fates",
-      artist: "John Williams",
-      src: "Duel of the Fates.mp3",
-      img: "duel_of_the_fates.jpg",
-    },
-  ]);
+  const [view, setView] = useState("player");
+  const [queue, setQueue] = useState(localLibrary);
+  const [queueIndex, setQueueIndex] = useState(0);
+  const [shuffle, setShuffle] = useState(false);
+  const [repeatMode, setRepeatMode] = useState("off"); // 'off' | 'all' | 'one'
+  const [favorites, setFavorites] = useLocalStorage("musicapp:favorites", []);
+  const [savedVolume, setSavedVolume] = useLocalStorage("musicapp:volume", 1);
 
-  const [songIndex, setSongIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
-  const [showSongsList, setShowSongsList] = useState(false);
+  const player = useAudioPlayer({
+    queue,
+    index: queueIndex,
+    onIndexChange: setQueueIndex,
+    repeatMode,
+    shuffle,
+    initialVolume: savedVolume,
+  });
 
+  // Persist volume changes only - setSavedVolume is stable and intentionally excluded.
   useEffect(() => {
-    if (isPlaying) {
-      audioRef.current.play();
-    }
-  }, [isPlaying]);
+    setSavedVolume(player.volume);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [player.volume]);
 
-  useEffect(() => {
-    loadSong(songIndex);
-  }, [songIndex]);
+  const isFavorite = (trackId) => favorites.some((track) => track.id === trackId);
 
-
-  const handleShowSongsList = () => {
-    setShowSongsList(!showSongsList);
+  const toggleFavorite = (track) => {
+    setFavorites((current) =>
+      isFavorite(track.id)
+        ? current.filter((t) => t.id !== track.id)
+        : [...current, track]
+    );
   };
 
-
-  const loadSong = (index) => {
-    if (audioRef.current) {
-      audioRef.current.src = `./src/assets/${songData[index].src}`;
-      audioRef.current.load();
-      if (isPlaying) {
-        audioRef.current.play();
-      }
+  const playFromList = (list, clickedIndex) => {
+    const clickedTrack = list[clickedIndex];
+    if (player.currentTrack?.id === clickedTrack.id) {
+      player.togglePlay();
+      return;
     }
-    document.querySelector(".song-name").textContent = songData[index].name;
-    document.querySelector(".song-artist").textContent = songData[index].artist;
-    if (document.querySelector(".song-list-details.selected")) {
-      songRefs.current[index].scrollIntoView({ behavior: "smooth" });
-    }
+    setQueue(list);
+    player.selectTrack(clickedIndex);
+    setView("player");
   };
 
-  /**
-   * Plays the next song in the playlist.
-   */
-  const nextSongPlay = () => {
-    let newIndex = songIndex + 1;
-    if (newIndex > songData.length - 1) {
-      newIndex = 0;
-    }
-    setSongIndex(newIndex);
-    loadSong(newIndex);
+  const cycleRepeatMode = () => {
+    setRepeatMode((mode) => {
+      if (mode === "off") return "all";
+      if (mode === "all") return "one";
+      return "off";
+    });
   };
 
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    const updateProgress = () => {
-      const songCurrentTime = document.querySelector(".time span:nth-child(1)");
-      const songDuration = document.querySelector(".time span:nth-child(2)");
-      const audioDuration = audio.duration;
-      const totalMinutes = Math.floor(audioDuration / 60);
-      const totalSeconds = Math.floor(audioDuration % 60);
-      if (isNaN(totalMinutes) || isNaN(totalSeconds)) {
-        return;
-      }
-      const currentMinutes = Math.floor(audio.currentTime / 60);
-      const currentSeconds = Math.floor(audio.currentTime % 60);
-      songCurrentTime.textContent = `${currentMinutes}:${
-        currentSeconds < 10 ? `0${currentSeconds}` : currentSeconds
-      }`;
-      songDuration.textContent = `${totalMinutes}:${
-        totalSeconds < 10 ? `0${totalSeconds}` : totalSeconds
-      }`;
-
-      const currentTime = audio.currentTime;
-      const duration = audio.duration;
-      const progress = (currentTime / duration) * 100;
-      document.querySelector(".song-progress").style.width = `${progress}%`;
-
-      if (currentTime === duration) {
-        nextSongPlay();
-      }
-    };
-
-    audio.addEventListener("timeupdate", updateProgress);
-
-    return () => {
-      audio.removeEventListener("timeupdate", updateProgress);
-    };
-  }, );
-
-
+  const goToView = (targetView) => {
+    setView((current) => (current === targetView ? "player" : targetView));
+  };
 
   return (
     <div className="container">
       <div className="player">
-        <PlayerTop handleShowSongsList={handleShowSongsList} />
-        {showSongsList ? (
-          <SongList
-            songRefs={songRefs}
-            songData={songData}
-            songIndex={songIndex}
-            setSongIndex={setSongIndex}
-            setSongData={setSongData}
-          />
-        ) : (
-          <PlayerBody
-            songData={songData}
-            songIndex={songIndex}
-            isPlaying={isPlaying}
+        <PlayerTop
+          title={VIEW_TITLES[view]}
+          showBack={view !== "player"}
+          onBack={() => setView("player")}
+          onOpenLibrary={() => goToView("library")}
+        />
+
+        {view === "player" && (
+          <PlayerBody track={player.currentTrack} isPlaying={player.isPlaying} />
+        )}
+        {view === "library" && (
+          <TrackList
+            tracks={localLibrary}
+            activeTrackId={player.currentTrack?.id}
+            onSelect={(i) => playFromList(localLibrary, i)}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            emptyMessage="Knihovna je prázdná."
           />
         )}
-        <SongInfo />
-        <SongDuration audioRef={audioRef} />
-        <Time />
-        <Controls
-          nextSongPlay={nextSongPlay}
-          setSongIndex={setSongIndex}
-          setIsPlaying={setIsPlaying}
-          songIndex={songIndex}
-          audioRef={audioRef}
-          songData={songData}
-          loadSong={loadSong}
-          isPlaying={isPlaying}
+        {view === "search" && (
+          <SearchView
+            activeTrackId={player.currentTrack?.id}
+            onSelect={playFromList}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+          />
+        )}
+        {view === "favorites" && (
+          <TrackList
+            tracks={favorites}
+            activeTrackId={player.currentTrack?.id}
+            onSelect={(i) => playFromList(favorites, i)}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            emptyMessage="Zatím nemáš žádné oblíbené skladby. Přidej je srdíčkem u skladby."
+          />
+        )}
+
+        <SongInfo
+          track={player.currentTrack}
+          isFavorite={player.currentTrack ? isFavorite(player.currentTrack.id) : false}
+          onToggleFavorite={() => player.currentTrack && toggleFavorite(player.currentTrack)}
         />
-        <PlayerFooter />
+
+        {player.error && <p className="player-error">{player.error}</p>}
+
+        <SongDuration
+          progressPercent={player.progressPercent}
+          onSeekPercent={player.seekByPercent}
+        />
+        <Time currentTime={player.currentTime} duration={player.duration} />
+
+        <VolumeControl
+          volume={player.volume}
+          muted={player.muted}
+          onChangeVolume={player.changeVolume}
+          onToggleMute={player.toggleMute}
+        />
+
+        <Controls
+          isPlaying={player.isPlaying}
+          onTogglePlay={player.togglePlay}
+          onNext={player.next}
+          onPrev={player.prev}
+          shuffle={shuffle}
+          onToggleShuffle={() => setShuffle((s) => !s)}
+          repeatMode={repeatMode}
+          onCycleRepeat={cycleRepeatMode}
+        />
+
+        <audio ref={player.audioRef} className="audio" preload="metadata" />
+
+        <PlayerFooter view={view} onNavigate={goToView} />
       </div>
     </div>
   );

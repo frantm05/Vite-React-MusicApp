@@ -1,24 +1,23 @@
-import propTypes from "prop-types";
+import PropTypes from "prop-types";
 
-
-const PlayerTop = (props) => {
-
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
-
-
+const PlayerTop = ({ title, showBack, onBack, onOpenLibrary }) => {
   return (
     <div className="player-top">
-      <button className="player-btn" type="button">
-        <i className="fa-solid fa-rotate-right" onClick={handleRefresh}></i>
-      </button>
-      <span>Now Playing...</span>
       <button
         className="player-btn"
         type="button"
-        onClick={props.handleShowSongsList}
+        aria-label={showBack ? "Zpět na přehrávač" : "Přehrávač"}
+        disabled={!showBack}
+        onClick={onBack}
+      >
+        <i className="fa-solid fa-arrow-left"></i>
+      </button>
+      <span>{title}</span>
+      <button
+        className="player-btn"
+        type="button"
+        aria-label="Otevřít knihovnu"
+        onClick={onOpenLibrary}
       >
         <i className="fa-solid fa-ellipsis"></i>
       </button>
@@ -26,6 +25,11 @@ const PlayerTop = (props) => {
   );
 };
 
-
+PlayerTop.propTypes = {
+  title: PropTypes.string.isRequired,
+  showBack: PropTypes.bool.isRequired,
+  onBack: PropTypes.func.isRequired,
+  onOpenLibrary: PropTypes.func.isRequired,
+};
 
 export default PlayerTop;

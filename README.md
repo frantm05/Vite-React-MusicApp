@@ -1,18 +1,20 @@
 # Music App 🎶
 
-A minimalist and fully functional music player application built using **React** and **Vite**. This project demonstrates key concepts in front-end development, including state management, and UI/UX design.
+A fully functional music player built with **React** and **Vite**. It combines a bundled local music library with online search powered by the free **iTunes Search API**.
 
 ### Features ✨
 
-- **Play/Pause/Skip**: Easily control music playback.
-- **Seek Functionality**: A progress bar allows users to jump to any part of a song.
-- **Dynamic Playlist**: A second view displays an infinite scrollable list of all available tracks. The currently playing song is automatically highlighted and moved to the top of the list for easy access.
-- **Responsive UI**: The application features a dark, modern design with a spinning album art animation when a song is playing.
+- **Local library**: play the bundled tracks with full playback control.
+- **Online search**: search any song or artist via the iTunes Search API (no API key required). Results play a ~30s preview clip, since no free API offers full-length legal streaming.
+- **Favorites**: like any track (local or from search) and find it later, persisted in `localStorage`.
+- **Playback controls**: play/pause, next/previous, click-to-seek progress bar, volume slider with mute, shuffle, and three repeat modes.
+- **Responsive, accessible UI**: works on mobile and desktop, with `aria-label`s and visible keyboard focus states.
 
 ### Technologies Used 🛠️
 
-- **React**: A JavaScript library for building user interfaces.
-- **Vite**: A fast, opinionated web dev build tool.
+- **React 18** + **Vite 5**
+- **iTunes Search API** for song search and preview playback
+- **Font Awesome** icons (self-hosted via npm)
 
 ### Installation and Usage 🚀
 
@@ -22,8 +24,7 @@ A minimalist and fully functional music player application built using **React**
     ```
 2.  Navigate to the project directory:
     ```bash
-    cd MusicApp
-    cd my-music-player
+    cd MusicApp/my-music-player
     ```
 3.  Install dependencies:
     ```bash
@@ -35,3 +36,5 @@ A minimalist and fully functional music player application built using **React**
     ```
 
 The application should now be running on `http://localhost:5173`.
+
+See [`MusicApp/my-music-player/README.md`](MusicApp/my-music-player/README.md) for more detail.
