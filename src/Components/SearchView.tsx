@@ -1,21 +1,38 @@
-import type { StoredFavorite, Track } from "../types";
-import type { ItunesSearch } from "../hooks/useItunesSearch";
+import type { SearchSource, StoredTrackRef, Track } from "../types";
+import type { MusicSearch } from "../hooks/useMusicSearch";
 import TrackList from "./TrackList";
 
+const SOURCES: { id: SearchSource; label: string; hint: string }[] = [
+  { id: "itunes", label: "iTunes", hint: "30s ukázky" },
+  { id: "audius", label: "Audius", hint: "celé skladby" },
+];
+
 interface SearchViewProps {
-  search: ItunesSearch;
+  search: MusicSearch;
   activeTrackId?: string;
   onSelect: (list: Track[], index: number) => void;
-  favorites: StoredFavorite[];
+  favorites: StoredTrackRef[];
   onToggleFavorite: (track: Track) => void;
+  onAddToPlaylist: (track: Track) => void;
+  onSaveToLibrary: (track: Track) => void;
+  savingTrackId: string | null;
 }
 
 /**
- * Pure presentation - the search state itself lives in useItunesSearch up
+ * Pure presentation - the search state itself lives in useMusicSearch up
  * in MusicApp, so the query and results survive switching tabs.
  */
-const SearchView = ({ search, activeTrackId, onSelect, favorites, onToggleFavorite }: SearchViewProps) => {
-  const { query, setQuery, results, status } = search;
+const SearchView = ({
+  search,
+  activeTrackId,
+  onSelect,
+  favorites,
+  onToggleFavorite,
+  onAddToPlaylist,
+  onSaveToLibrary,
+  savingTrackId,
+}: SearchViewProps) => {
+  const { query, setQuery, source, setSource, results, status } = search;
 
   return (
     <div className="search-view">
@@ -30,8 +47,26 @@ const SearchView = ({ search, activeTrackId, onSelect, favorites, onToggleFavori
         />
       </div>
 
+      <div className="search-source-toggle" role="group" aria-label="Zdroj vyhledávání">
+        {SOURCES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            className={source === s.id ? "active" : ""}
+            onClick={() => setSource(s.id)}
+            aria-pressed={source === s.id}
+          >
+            {s.label} <small>{s.hint}</small>
+          </button>
+        ))}
+      </div>
+
       {status === "idle" && (
-        <p className="list-empty-state">Zadej název skladby nebo interpreta.</p>
+        <p className="list-empty-state">
+          {source === "audius"
+            ? "Audius nabízí volně licencovanou hudbu v plné délce - skladby s ikonou stažení si můžeš uložit do knihovny."
+            : "Zadej název skladby nebo interpreta."}
+        </p>
       )}
       {status === "loading" && <p className="list-empty-state">Hledám...</p>}
       {status === "error" && (
@@ -47,6 +82,9 @@ const SearchView = ({ search, activeTrackId, onSelect, favorites, onToggleFavori
           onSelect={(i) => onSelect(results, i)}
           favorites={favorites}
           onToggleFavorite={onToggleFavorite}
+          onAddToPlaylist={onAddToPlaylist}
+          onSaveToLibrary={onSaveToLibrary}
+          savingTrackId={savingTrackId}
           emptyMessage=""
         />
       )}

@@ -1,4 +1,4 @@
-export type TrackSource = "local" | "itunes" | "custom";
+export type TrackSource = "local" | "itunes" | "audius" | "custom";
 
 interface TrackBase {
   id: string;
@@ -24,6 +24,19 @@ export interface ItunesTrack extends TrackBase {
   fullDurationMs?: number;
 }
 
+/**
+ * Track from the Audius API - full-length, legally streamable. Tracks whose
+ * artist enabled downloads can also be saved into the local library.
+ */
+export interface AudiusTrack extends TrackBase {
+  source: "audius";
+  isPreview: false;
+  src: string;
+  img: string | null;
+  durationSec?: number;
+  downloadable: boolean;
+}
+
 /** Track the user uploaded - src/img are blob: URLs valid only for this session. */
 export interface CustomTrack extends TrackBase {
   source: "custom";
@@ -32,20 +45,30 @@ export interface CustomTrack extends TrackBase {
   img: string | null;
 }
 
-export type Track = LocalTrack | ItunesTrack | CustomTrack;
+export type Track = LocalTrack | ItunesTrack | AudiusTrack | CustomTrack;
 
 /**
- * The persisted shape of a favorite. Custom tracks are stored as a bare
- * reference (their blob: URLs die on reload) and rehydrated from the
- * custom library at runtime; other tracks are stored whole.
+ * The persisted shape of a track reference (favorites, playlist items).
+ * Custom tracks are stored as a bare reference (their blob: URLs die on
+ * reload) and rehydrated from the custom library at runtime; other tracks
+ * are stored whole.
  */
-export type StoredFavorite =
+export type StoredTrackRef =
   | LocalTrack
   | ItunesTrack
+  | AudiusTrack
   | { source: "custom"; id: string; name: string; artist: string };
+
+export interface Playlist {
+  id: string;
+  name: string;
+  tracks: StoredTrackRef[];
+}
 
 export type RepeatMode = "off" | "all" | "one";
 
-export type View = "player" | "library" | "search" | "favorites";
+export type View = "player" | "library" | "search" | "playlists" | "favorites";
 
 export type SearchStatus = "idle" | "loading" | "success" | "error";
+
+export type SearchSource = "itunes" | "audius";

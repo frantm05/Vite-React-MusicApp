@@ -4,6 +4,7 @@ const NAV_ITEMS: { view: View; icon: string; label: string }[] = [
   { view: "player", icon: "fa-compact-disc", label: "Přehrávač" },
   { view: "library", icon: "fa-list", label: "Knihovna" },
   { view: "search", icon: "fa-magnifying-glass", label: "Hledat" },
+  { view: "playlists", icon: "fa-layer-group", label: "Playlisty" },
   { view: "favorites", icon: "fa-heart", label: "Oblíbené" },
 ];
 
