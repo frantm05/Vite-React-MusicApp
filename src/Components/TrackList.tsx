@@ -1,4 +1,4 @@
-import type { StoredTrackRef, Track } from "../types";
+import { isDownloadable, type StoredTrackRef, type Track } from "../types";
 
 interface TrackListProps {
   tracks: Track[];
@@ -55,7 +55,13 @@ const TrackList = ({
             onClick={() => onSelect(index)}
           >
             {track.img ? (
-              <img src={track.img} alt="" />
+              <img
+                src={track.img}
+                alt=""
+                onError={(e) => {
+                  e.currentTarget.src = "/favicon.svg";
+                }}
+              />
             ) : (
               <span className="song-list-cover-empty" aria-hidden="true">
                 <i className="fa-solid fa-music"></i>
@@ -68,7 +74,7 @@ const TrackList = ({
             {track.isPreview && <span className="preview-badge small">30s</span>}
           </button>
 
-          {onSaveToLibrary && track.source === "audius" && track.downloadable && (
+          {onSaveToLibrary && isDownloadable(track) && (
             <button
               type="button"
               className="row-action-btn"
