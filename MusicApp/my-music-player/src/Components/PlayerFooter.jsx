@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 
 const NAV_ITEMS = [
+  { view: "player", icon: "fa-compact-disc", label: "Přehrává se" },
   { view: "library", icon: "fa-list", label: "Knihovna" },
   { view: "search", icon: "fa-magnifying-glass", label: "Hledat" },
   { view: "favorites", icon: "fa-heart", label: "Oblíbené" },
@@ -16,7 +17,7 @@ const PlayerFooter = ({ view, onNavigate }) => {
           className={`footer-nav-btn ${view === item.view ? "active" : ""}`}
           onClick={() => onNavigate(item.view)}
           aria-label={item.label}
-          aria-pressed={view === item.view}
+          aria-current={view === item.view}
         >
           <i className={`fa-solid ${item.icon}`}></i>
           <span>{item.label}</span>
