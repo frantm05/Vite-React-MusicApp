@@ -4,14 +4,14 @@ const PlayerBody = ({ track, isPlaying }) => {
   return (
     <div className="player-body">
       <div className="current-song">
-        {track ? (
+        {track?.img ? (
           <img
             src={track.img}
             alt={`${track.name} cover`}
             className={`cover ${isPlaying ? "rotate" : ""}`}
           />
         ) : (
-          <div className="cover cover-empty">
+          <div className={`cover cover-empty ${track && isPlaying ? "rotate" : ""}`}>
             <i className="fa-solid fa-music"></i>
           </div>
         )}

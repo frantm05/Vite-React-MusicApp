@@ -6,12 +6,13 @@ import SearchView from "./SearchView";
 import SongInfo from "./SongInfo";
 import SongDuration from "./SongDuration";
 import Time from "./Time";
-import VolumeControl from "./VolumeControl";
 import PlayerFooter from "./PlayerFooter";
 import Controls from "./Controls";
+import AddTrackForm from "./AddTrackForm";
 import { localLibrary } from "../data/localLibrary";
 import { useAudioPlayer } from "../hooks/useAudioPlayer";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { useCustomLibrary } from "../hooks/useCustomLibrary";
 
 const VIEW_TITLES = {
   player: "Now Playing...",
@@ -27,12 +28,16 @@ const VIEW_TITLES = {
  */
 const MusicApp = () => {
   const [view, setView] = useState("player");
+  const [volumeOpen, setVolumeOpen] = useState(false);
   const [queue, setQueue] = useState(localLibrary);
   const [queueIndex, setQueueIndex] = useState(0);
   const [shuffle, setShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState("off"); // 'off' | 'all' | 'one'
   const [favorites, setFavorites] = useLocalStorage("musicapp:favorites", []);
   const [savedVolume, setSavedVolume] = useLocalStorage("musicapp:volume", 1);
+  const { customTracks, addTrack, removeTrack } = useCustomLibrary();
+
+  const libraryTracks = [...localLibrary, ...customTracks];
 
   const player = useAudioPlayer({
     queue,
@@ -70,6 +75,13 @@ const MusicApp = () => {
     setView("player");
   };
 
+  const handleDeleteCustomTrack = (trackId) => {
+    if (player.currentTrack?.id === trackId) {
+      player.pause();
+    }
+    removeTrack(trackId);
+  };
+
   const cycleRepeatMode = () => {
     setRepeatMode((mode) => {
       if (mode === "off") return "all";
@@ -78,51 +90,58 @@ const MusicApp = () => {
     });
   };
 
-  const goToView = (targetView) => {
-    setView((current) => (current === targetView ? "player" : targetView));
-  };
-
   return (
     <div className="container">
       <div className="player">
         <PlayerTop
           title={VIEW_TITLES[view]}
-          showBack={view !== "player"}
-          onBack={() => setView("player")}
-          onOpenLibrary={() => goToView("library")}
+          volumeOpen={volumeOpen}
+          onToggleVolume={() => setVolumeOpen((v) => !v)}
+          onCloseVolume={() => setVolumeOpen(false)}
+          volume={player.volume}
+          muted={player.muted}
+          onChangeVolume={player.changeVolume}
+          onToggleMute={player.toggleMute}
         />
 
-        {view === "player" && (
-          <PlayerBody track={player.currentTrack} isPlaying={player.isPlaying} />
-        )}
-        {view === "library" && (
-          <TrackList
-            tracks={localLibrary}
-            activeTrackId={player.currentTrack?.id}
-            onSelect={(i) => playFromList(localLibrary, i)}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
-            emptyMessage="Knihovna je prázdná."
-          />
-        )}
-        {view === "search" && (
-          <SearchView
-            activeTrackId={player.currentTrack?.id}
-            onSelect={playFromList}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
-          />
-        )}
-        {view === "favorites" && (
-          <TrackList
-            tracks={favorites}
-            activeTrackId={player.currentTrack?.id}
-            onSelect={(i) => playFromList(favorites, i)}
-            favorites={favorites}
-            onToggleFavorite={toggleFavorite}
-            emptyMessage="Zatím nemáš žádné oblíbené skladby. Přidej je srdíčkem u skladby."
-          />
-        )}
+        <div className="view-panel">
+          {view === "player" && (
+            <PlayerBody track={player.currentTrack} isPlaying={player.isPlaying} />
+          )}
+          {view === "library" && (
+            <>
+              <AddTrackForm onAdd={addTrack} />
+              <TrackList
+                tracks={libraryTracks}
+                activeTrackId={player.currentTrack?.id}
+                onSelect={(i) => playFromList(libraryTracks, i)}
+                favorites={favorites}
+                onToggleFavorite={toggleFavorite}
+                onDelete={handleDeleteCustomTrack}
+                emptyMessage="Knihovna je prázdná."
+              />
+            </>
+          )}
+          {view === "search" && (
+            <SearchView
+              activeTrackId={player.currentTrack?.id}
+              onSelect={playFromList}
+              favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+            />
+          )}
+          {view === "favorites" && (
+            <TrackList
+              tracks={favorites}
+              activeTrackId={player.currentTrack?.id}
+              onSelect={(i) => playFromList(favorites, i)}
+              favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+              onDelete={handleDeleteCustomTrack}
+              emptyMessage="Zatím nemáš žádné oblíbené skladby. Přidej je srdíčkem u skladby."
+            />
+          )}
+        </div>
 
         <SongInfo
           track={player.currentTrack}
@@ -138,13 +157,6 @@ const MusicApp = () => {
         />
         <Time currentTime={player.currentTime} duration={player.duration} />
 
-        <VolumeControl
-          volume={player.volume}
-          muted={player.muted}
-          onChangeVolume={player.changeVolume}
-          onToggleMute={player.toggleMute}
-        />
-
         <Controls
           isPlaying={player.isPlaying}
           onTogglePlay={player.togglePlay}
@@ -158,7 +170,7 @@ const MusicApp = () => {
 
         <audio ref={player.audioRef} className="audio" preload="metadata" />
 
-        <PlayerFooter view={view} onNavigate={goToView} />
+        <PlayerFooter view={view} onNavigate={setView} />
       </div>
     </div>
   );

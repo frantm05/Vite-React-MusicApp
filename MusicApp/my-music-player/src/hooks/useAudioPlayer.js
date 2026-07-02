@@ -37,15 +37,22 @@ export function useAudioPlayer({
     repeatModeRef.current = repeatMode;
   }, [repeatMode]);
 
+  /** Restarts the currently loaded track from 0:00 without going through onIndexChange. */
+  const restartCurrentTrack = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.play().catch(() => setError("Tuto skladbu se nepodařilo přehrát."));
+  };
+
   const goRelative = (direction, { auto = false } = {}) => {
     if (queue.length === 0) return;
 
-    if (queue.length === 1) {
-      onIndexChange(0);
-      return;
-    }
-
     if (shuffle) {
+      if (queue.length === 1) {
+        restartCurrentTrack();
+        return;
+      }
       if (direction < 0 && shuffleHistoryRef.current.length > 0) {
         onIndexChange(shuffleHistoryRef.current.pop());
         return;
@@ -65,6 +72,13 @@ export function useAudioPlayer({
       newIndex = 0;
     } else if (newIndex < 0) {
       newIndex = queue.length - 1;
+    }
+
+    // Wrapping back to the same track (e.g. a single-item queue with repeat-all)
+    // won't change trackKey, so the load effect won't fire - restart explicitly.
+    if (newIndex === index) {
+      restartCurrentTrack();
+      return;
     }
     onIndexChange(newIndex);
   };

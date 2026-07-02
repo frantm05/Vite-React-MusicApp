@@ -2,9 +2,10 @@ import PropTypes from "prop-types";
 
 /**
  * Renders any list of tracks (library, search results, favorites) with
- * consistent selection/favorite behaviour.
+ * consistent selection/favorite behaviour. Custom (user-uploaded) tracks
+ * additionally get a delete button when onDelete is provided.
  */
-const TrackList = ({ tracks, activeTrackId, onSelect, favorites, onToggleFavorite, emptyMessage }) => {
+const TrackList = ({ tracks, activeTrackId, onSelect, favorites, onToggleFavorite, emptyMessage, onDelete }) => {
   if (tracks.length === 0) {
     return <p className="list-empty-state">{emptyMessage}</p>;
   }
@@ -23,7 +24,13 @@ const TrackList = ({ tracks, activeTrackId, onSelect, favorites, onToggleFavorit
             className="song-list-play"
             onClick={() => onSelect(index)}
           >
-            <img src={track.img} alt="" />
+            {track.img ? (
+              <img src={track.img} alt="" />
+            ) : (
+              <span className="song-list-cover-empty" aria-hidden="true">
+                <i className="fa-solid fa-music"></i>
+              </span>
+            )}
             <div className="song-list-name">
               <span>{track.name}</span>
               <div>{track.artist}</div>
@@ -39,6 +46,16 @@ const TrackList = ({ tracks, activeTrackId, onSelect, favorites, onToggleFavorit
           >
             <i className={`fa-${isFavorite(track.id) ? "solid" : "regular"} fa-heart`}></i>
           </button>
+          {track.source === "custom" && onDelete && (
+            <button
+              type="button"
+              className="delete-track-btn"
+              onClick={() => onDelete(track.id)}
+              aria-label={`Smazat skladbu ${track.name}`}
+            >
+              <i className="fa-solid fa-trash"></i>
+            </button>
+          )}
         </div>
       ))}
     </div>
@@ -52,6 +69,7 @@ TrackList.propTypes = {
   favorites: PropTypes.array.isRequired,
   onToggleFavorite: PropTypes.func.isRequired,
   emptyMessage: PropTypes.string.isRequired,
+  onDelete: PropTypes.func,
 };
 
 export default TrackList;
