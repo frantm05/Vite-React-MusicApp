@@ -1,28 +1,41 @@
 import { useEffect, useState } from "react";
-import type { AudiusTrack, ItunesTrack, SearchSource, SearchStatus } from "../types";
+import type { ArchiveTrack, AudiusTrack, ItunesTrack, SearchSource, SearchStatus } from "../types";
 import { searchSongs } from "../services/itunesApi";
 import { searchAudius } from "../services/audiusApi";
+import { searchArchive } from "../services/archiveApi";
 import { useDebouncedValue } from "./useDebouncedValue";
+
+type SearchResult = ItunesTrack | AudiusTrack | ArchiveTrack;
 
 export interface MusicSearch {
   query: string;
   setQuery: (query: string) => void;
   source: SearchSource;
   setSource: (source: SearchSource) => void;
-  results: (ItunesTrack | AudiusTrack)[];
+  results: SearchResult[];
   status: SearchStatus;
 }
 
+const SEARCHERS: Record<
+  SearchSource,
+  (term: string, opts: { signal?: AbortSignal }) => Promise<SearchResult[]>
+> = {
+  itunes: searchSongs,
+  audius: searchAudius,
+  archive: searchArchive,
+};
+
 /**
- * Debounced music search across two free sources: iTunes (rich catalog,
- * 30s previews) and Audius (openly licensed music, full-length streams).
+ * Debounced music search across free sources: iTunes (rich catalog, 30s
+ * previews), Audius (openly licensed music, full-length streams) and the
+ * Internet Archive (live recordings and netlabel releases, downloadable).
  * Lives in MusicApp (which never unmounts) rather than in the search view,
  * so the query and results survive switching tabs.
  */
 export function useMusicSearch(): MusicSearch {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState<SearchSource>("itunes");
-  const [results, setResults] = useState<(ItunesTrack | AudiusTrack)[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [status, setStatus] = useState<SearchStatus>("idle");
   const debouncedQuery = useDebouncedValue(query, 400);
 
@@ -37,12 +50,7 @@ export function useMusicSearch(): MusicSearch {
     const controller = new AbortController();
     setStatus("loading");
 
-    const request =
-      source === "itunes"
-        ? searchSongs(trimmed, { signal: controller.signal })
-        : searchAudius(trimmed, { signal: controller.signal });
-
-    request
+    SEARCHERS[source](trimmed, { signal: controller.signal })
       .then((tracks) => {
         setResults(tracks);
         setStatus("success");

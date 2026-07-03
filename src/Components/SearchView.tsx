@@ -5,7 +5,15 @@ import TrackList from "./TrackList";
 const SOURCES: { id: SearchSource; label: string; hint: string }[] = [
   { id: "itunes", label: "iTunes", hint: "30s ukázky" },
   { id: "audius", label: "Audius", hint: "celé skladby" },
+  { id: "archive", label: "Archive", hint: "koncerty a alba" },
 ];
+
+const IDLE_HINTS: Record<SearchSource, string> = {
+  itunes: "Zadej název skladby nebo interpreta.",
+  audius: "Audius nabízí volně licencovanou hudbu v plné délce - skladby s ikonou stažení si můžeš uložit do knihovny.",
+  archive:
+    "Internet Archive obsahuje legální koncertní nahrávky známých kapel i netlabelová alba - vše v plné délce a ke stažení do knihovny.",
+};
 
 interface SearchViewProps {
   search: MusicSearch;
@@ -61,13 +69,7 @@ const SearchView = ({
         ))}
       </div>
 
-      {status === "idle" && (
-        <p className="list-empty-state">
-          {source === "audius"
-            ? "Audius nabízí volně licencovanou hudbu v plné délce - skladby s ikonou stažení si můžeš uložit do knihovny."
-            : "Zadej název skladby nebo interpreta."}
-        </p>
-      )}
+      {status === "idle" && <p className="list-empty-state">{IDLE_HINTS[source]}</p>}
       {status === "loading" && <p className="list-empty-state">Hledám...</p>}
       {status === "error" && (
         <p className="list-empty-state">Vyhledávání se nezdařilo. Zkus to prosím znovu.</p>

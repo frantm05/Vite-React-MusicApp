@@ -6,9 +6,10 @@ A fully functional music player built with **React**, **TypeScript** and **Vite*
 
 - **Local library**: play the bundled tracks with full playback control.
 - **Your own music**: upload audio files (with optional cover art) straight in the browser - they're stored in IndexedDB and survive reloads.
-- **Online search from two sources**:
+- **Online search from three sources**:
   - **iTunes Search API** - huge catalog, ~30s preview clips (no free API offers full-length streaming of mainstream catalog).
   - **Audius** - openly licensed / artist-uploaded music with **full-length streaming**, and tracks whose artist allows it can be **saved into your library** for keeps.
+  - **Internet Archive** - legal live recordings of well-known bands (Live Music Archive) and netlabel releases, full-length and **downloadable into your library**.
 - **Playlists**: create your own playlists and add tracks from any list via the "+" button.
 - **Favorites**: like any track, persisted in `localStorage`.
 - **Playback controls**: play/pause, next/previous, drag-to-seek progress bar, volume flyout with mute, shuffle, and three repeat modes.

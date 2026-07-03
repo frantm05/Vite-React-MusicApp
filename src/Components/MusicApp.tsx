@@ -19,7 +19,7 @@ import { useMusicSearch } from "../hooks/useMusicSearch";
 import { usePlaylists } from "../hooks/usePlaylists";
 import { useSwipeNavigation } from "../hooks/useSwipeNavigation";
 import { rehydrateTrackRefs, toStoredTrackRef } from "../utils/trackRefs";
-import type { RepeatMode, StoredTrackRef, Track, View } from "../types";
+import { isDownloadable, type RepeatMode, type StoredTrackRef, type Track, type View } from "../types";
 
 const VIEW_TITLES: Record<View, string> = {
   player: "Přehrává se",
@@ -143,11 +143,11 @@ const MusicApp = () => {
   };
 
   /**
-   * Fetches a downloadable Audius track and stores it in the local
-   * (IndexedDB-backed) library, so it plays even without the network.
+   * Fetches a downloadable track (Audius, Internet Archive) and stores it
+   * in the local (IndexedDB-backed) library, so it plays even offline.
    */
   const saveToLibrary = async (track: Track) => {
-    if (track.source !== "audius" || !track.downloadable || savingTrackId) return;
+    if (!isDownloadable(track) || savingTrackId) return;
     setSavingTrackId(track.id);
     try {
       const audioResponse = await fetch(track.src);
